@@ -1,81 +1,23 @@
 import argparse
 import asyncio
-import itertools
 import logging
 import os
 import shutil
-from files import util as ioutil
 from pathlib import Path
 from typing import Any
 
 from shazamio import Shazam
 
+from files import util as ioutil
+from models import TrackInfo
+
 logger = logging.getLogger(__name__)
-
-
-class Album:
-    def __init__(self, metadata: dict[str, Any]):
-        sections = metadata["track"]["sections"]
-        info = [x["metadata"] for x in sections if "metadata" in x]
-        items = list(itertools.chain(*info))
-
-        def extract_data(title: str) -> str | int:
-            for item in items:
-                if item["title"] == title:
-                    return item["text"]
-
-        self.__name: str = extract_data("Album")
-        self.__released: int = extract_data("Released")
-
-    @property
-    def name(self):
-        return self.__name
-
-    @property
-    def released(self):
-        return self.__released
-
-    def __str__(self):
-        return f"""Name: {self.__name}
-                   Released: {self.__released}"""
-
-
-class TrackInfo:
-    def __init__(self, metadata: dict[str, Any]):
-        track = metadata["track"]
-
-        self.__title: str = track["title"]
-        self.__artist: str = track["subtitle"]
-        self.__number: int = 0
-        self.__album: Album = Album(metadata)
-
-    @property
-    def title(self) -> str:
-        return self.__title
-
-    @property
-    def artist(self) -> str:
-        return self.__artist
-
-    @property
-    def album(self) -> Album:
-        return self.__album
-
-    @property
-    def track_number(self) -> int:
-        return self.__number
-
-    def __str__(self) -> str:
-        return f"""Artist: {self.__artist}
-            Title: {self.__title}
-            Album:  {self.__album}
-            Track Number: {self.__number}"""
 
 
 def arg_parser():
     parser = argparse.ArgumentParser(description="Organize music from source folder to destination folder using Shazam")
-    parser.add_argument("--src", "-s", metavar="SRC", type=str, help="Source directory to scan files")
-    parser.add_argument("--dest", "-d", metavar="DEST", type=str, help="Destination directory to copy files")
+    parser.add_argument("--src", "-s", metavar="SRC", type=str, help="source folder to scan")
+    parser.add_argument("--dest", "-d", metavar="DEST", type=str, help="where it copy files")
     return parser.parse_args()
 
 
