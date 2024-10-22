@@ -1,3 +1,4 @@
+import argparse
 import asyncio
 import itertools
 import logging
@@ -71,10 +72,15 @@ class TrackInfo:
             Track Number: {self.__number}"""
 
 
-async def main() -> Any:
+def arg_parser():
+    parser = argparse.ArgumentParser(description="Organize music from source folder to destination folder using Shazam")
+    parser.add_argument("--src", "-s", metavar="SRC", type=str, help="Source directory to scan files")
+    parser.add_argument("--dest", "-d", metavar="DEST", type=str, help="Destination directory to copy files")
+    return parser.parse_args()
+
+
+async def main(src, dst) -> Any:
     shazam: Shazam = Shazam()
-    src: str = input("Which path scan?: ")
-    dst: str = input("Where do you want to copy files?: ")
     for song_file in ioutil.scan_folder(src):
         if ioutil.accepted_file_type(song_file):
             shazam_metadata: dict[str, Any] = await shazam.recognize(song_file)
@@ -92,5 +98,6 @@ async def main() -> Any:
 
 if __name__ == '__main__':
     logging.basicConfig(filename="music.log", level=logging.DEBUG)
+    args = arg_parser()
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+    loop.run_until_complete(main(args.src, args.dest))
