@@ -3,10 +3,10 @@ import itertools
 import logging
 import os
 import shutil
+from files import util as ioutil
 from pathlib import Path
 from typing import Any
 
-import magic
 from shazamio import Shazam
 
 logger = logging.getLogger(__name__)
@@ -71,29 +71,23 @@ class TrackInfo:
             Track Number: {self.__number}"""
 
 
-def accepted_file_type(file: Any) -> bool:
-    mime = magic.from_file(file, mime=True)
-    return mime in ('audio/mpeg', 'audio/mp3')
-
-
 async def main() -> Any:
     shazam: Shazam = Shazam()
     src: str = input("Which path scan?: ")
     dst: str = input("Where do you want to copy files?: ")
-    for (root, dirs, files) in os.walk(top=src):
-        for file in files:
-            song: str = root + os.sep + file
-            if accepted_file_type(song):
-                shazam_metadata: dict[str, Any] = await shazam.recognize(song)
-                track_info = TrackInfo(shazam_metadata)
-                logging.info(f"Recognize file {song} as {track_info}")
-                album_path = os.path.join(dst, track_info.artist,
-                                          f"{track_info.album.released} - {track_info.album.name}")
-                if not os.path.exists(album_path):
-                    Path(album_path).mkdir(mode=0o755, parents=True, exist_ok=True)
+    for song_file in ioutil.scan_folder(src):
+        if ioutil.accepted_file_type(song_file):
+            shazam_metadata: dict[str, Any] = await shazam.recognize(song_file)
+            track_info = TrackInfo(shazam_metadata)
+            logging.info(f"Recognize file {song_file} as {track_info}")
+            album_path: str = os.path.join(dst, track_info.artist,
+                                           f"{track_info.album.released} - {track_info.album.name}")
+            if not os.path.exists(album_path):
+                Path(album_path).mkdir(mode=0o755, parents=True, exist_ok=True)
 
-                # I can copy to file now
-                shutil.copy(song, os.path.join(album_path, f"{track_info.title}.mp3"))
+            # I can copy to file now
+            shutil.copy(song_file,
+                        os.path.join(album_path, f"{track_info.track_number} - {track_info.title}.mp3"))
 
 
 if __name__ == '__main__':
