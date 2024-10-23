@@ -1,3 +1,2 @@
 python-magic~=0.4.27
 shazamio~=0.6.0
-requests~=2.32.3
