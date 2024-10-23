@@ -6,37 +6,33 @@ from models.track import TrackInfo, Album
 
 
 async def __extract_data(data: dict[str, Any]) -> dict[str, Any]:
-    track_data = data["track"]
-    sections_data = track_data["sections"]
-    items = list(itertools.chain(*[x["metadata"] for x in sections_data if "metadata" in x]))
+    def album_field(x: str, lst: list) -> str | int:
+        for elem in lst:
+            if x == elem["title"]:
+                return elem["text"]
 
-    def album_data(t: str) -> str | int:
-        for item in items:
-            if item["title"] == t:
-                return item["text"]
-
-    def seek_track(which: str, ad: dict[str, Any]) -> dict[str, Any]:
-        album_tracks = ad["data"][0]["relationships"]["tracks"]["data"]
-        for track in album_tracks:
-            if which == track["attributes"]["name"]:
-                return track["attributes"]
+    def seek_track(x: str, metadata: dict[str, Any]) -> dict[str, Any]:
+        tts = metadata["data"][0]["relationships"]["tracks"]["data"]
+        for t in tts:
+            if x == t["attributes"]["name"]:
+                return t["attributes"]
         return {}
 
-    title = track_data["title"]
-    artist = track_data["subtitle"]
-    album_id = int(track_data['albumadamid'])
-    album_name = album_data("Album")
-    album_release_year = album_data("Released")
-    album_data = seek_track(title, await shazam.album(album_id=album_id))
+    track_data = data["track"]
+    track_attrs = list(itertools.chain(*[x["metadata"] for x in track_data["sections"] if "metadata" in x]))
+    album_attrs = seek_track(
+        x=track_data["title"],
+        metadata=await shazam.album(album_id=int(track_data['albumadamid']))
+    )
 
     return {
-        "title": title,
-        "artist": artist,
-        "track_number": album_data["trackNumber"],
+        "title": track_data["title"],
+        "artist": track_data["subtitle"],
+        "track_number": album_attrs["trackNumber"],
         "album": {
-            "id": album_id,
-            "name": album_name,
-            "released": album_release_year
+            "id": int(track_data['albumadamid']),
+            "name": album_field("Album", track_attrs),
+            "released": album_field("Released", track_attrs)
         }
     }
 
