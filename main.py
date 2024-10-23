@@ -6,10 +6,8 @@ import shutil
 from pathlib import Path
 from typing import Any
 
-from shazamio import Shazam
-
-from files import util as ioutil
-from models import TrackInfo
+from files.util import scan_folder, accepted_file_type
+from service.provider import search_song
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +20,9 @@ def arg_parser():
 
 
 async def main(src, dst) -> Any:
-    shazam: Shazam = Shazam()
-    for song_file in ioutil.scan_folder(src):
-        if ioutil.accepted_file_type(song_file):
-            shazam_metadata: dict[str, Any] = await shazam.recognize(song_file)
-            track_info = TrackInfo(shazam_metadata)
+    for song_file in scan_folder(src):
+        if accepted_file_type(song_file):
+            track_info = await search_song(song_file)
             logging.info(f"Recognize file {song_file} as {track_info}")
             album_path: str = os.path.join(dst, track_info.artist,
                                            f"{track_info.album.released} - {track_info.album.name}")
