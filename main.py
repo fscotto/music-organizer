@@ -22,6 +22,7 @@ def arg_parser():
 async def main(src, dst) -> Any:
     for song_file in scan_folder(src):
         if accepted_file_type(song_file):
+            print(f"Found file {song_file}")
             track_info = await search_song(song_file)
             logging.info(f"Recognize file {song_file} as {track_info}")
             album_path: str = os.path.join(dst, track_info.artist,
@@ -32,6 +33,8 @@ async def main(src, dst) -> Any:
             # I can copy to file now
             shutil.copy(song_file,
                         os.path.join(album_path, f"{track_info.track_number} - {track_info.title}.mp3"))
+        else:
+            print(f"Skipped file {song_file}")
 
 
 if __name__ == '__main__':

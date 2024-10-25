@@ -1,8 +1,12 @@
 import itertools
+import json
+import logging
 from typing import Any
 
 from api import shazam
 from models.track import TrackInfo, Album
+
+logger = logging.getLogger(__name__)
 
 
 async def __extract_data(data: dict[str, Any]) -> dict[str, Any]:
@@ -18,6 +22,7 @@ async def __extract_data(data: dict[str, Any]) -> dict[str, Any]:
                 return t["attributes"]
         return {}
 
+    logger.debug(json.dumps(data, indent=2))
     track_data = data["track"]
     track_attrs = list(itertools.chain(*[x["metadata"] for x in track_data["sections"] if "metadata" in x]))
     album_attrs = seek_track(
