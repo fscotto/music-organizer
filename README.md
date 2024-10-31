@@ -1,5 +1,7 @@
 # 🎶🎶🎶 Music Organizer 🎶🎶🎶
 
+> ⚠️ **_DISCLAIMER:_**  This project is in alpha phase.
+
 This project is designed to automatically recognize and organize music folders.
 
 ---
