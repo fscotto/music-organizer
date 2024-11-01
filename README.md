@@ -1,6 +1,6 @@
-# 🎶🎶🎶 Music Organizer 🎶🎶🎶
+# 🎶🎶🎶 Pymorg 🎶🎶🎶
 
-> ⚠️ **_DISCLAIMER:_**  This project is in alpha phase.
+> ⚠️ **_DISCLAIMER:_**  This project is in alpha.
 
 This project is designed to automatically recognize and organize music folders.
 
