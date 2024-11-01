@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "music-organizer"
+name = "pymorg"
 version = "0.1.0"
 description = "Project for recognize automatically and organize music folders"
 authors = ["Fabio Scotto di Santolo <fabio.scottodisantolo@gmail.com>"]
