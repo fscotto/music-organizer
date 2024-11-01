@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 from typing import Any
 
 import magic
@@ -16,4 +17,4 @@ def scan_folder(src: str):
 def accepted_file_type(file: Any) -> bool:
     mime = magic.from_file(file, mime=True)
     logger.info(f"MIME {mime} for file {file}")
-    return mime in ('audio/mpeg', 'audio/mp3')
+    return re.search('audio/*', mime) is not None

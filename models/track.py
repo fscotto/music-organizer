@@ -17,8 +17,7 @@ class Album:
         return self.__released
 
     def __str__(self):
-        return f"""Name: {self.__name}
-                   Released: {self.__released}"""
+        return f"{self.__released} - {self.__name}"
 
 
 class TrackInfo:
@@ -45,7 +44,9 @@ class TrackInfo:
         return self.__number
 
     def __str__(self) -> str:
-        return f"""Artist: {self.__artist}
-            Title: {self.__title}
-            Album:  {self.__album}
-            Track Number: {self.__number}"""
+        return f"""
+        Artist: {self.__artist}
+        Title: {self.__title}
+        Album:  {self.__album}
+        Track Number: {self.__number}
+    """
