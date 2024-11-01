@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "music-organizer"
+version = "0.1.0"
+description = "Project for recognize automatically and organize music folders"
+authors = ["Fabio Scotto di Santolo <fabio.scottodisantolo@gmail.com>"]
+license = "GPLv3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+python-magic = "^0.4.27"
+shazamio = "^0.7.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

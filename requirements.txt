@@ -1,2 +1,2 @@
 python-magic~=0.4.27
-shazamio~=0.6.0
+shazamio~=0.7.0
