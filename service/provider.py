@@ -5,7 +5,7 @@ import os.path
 import re
 from typing import Any
 
-from api import shazam
+from api.shazam import ShazamClient
 from models.track import TrackInfo, Album
 
 logger = logging.getLogger(__name__)
@@ -13,6 +13,9 @@ logger = logging.getLogger(__name__)
 
 class SongRecognizeError(Exception):
     pass
+
+
+__SHAZAM_CLIENT = ShazamClient()
 
 
 async def __extract_data(data: dict[str, Any]) -> dict[str, Any]:
@@ -30,7 +33,16 @@ async def __extract_data(data: dict[str, Any]) -> dict[str, Any]:
         return {}
 
     def sanitize(s: str) -> str:
-        return re.sub(f'{os.path.sep}', repl='-', string=s)
+        rules = (
+            lambda x: re.sub(f'{os.path.sep}', repl='-', string=x),
+            lambda x: re.sub(f':', repl='_', string=x),
+            lambda x: re.sub(f'\\?', repl='', string=x),
+            lambda x: re.sub(f'"', repl='', string=x),
+            lambda x: re.sub(f"'", repl='', string=x),
+        )
+        for rule in rules:
+            s = rule(s)
+        return s
 
     logger.debug(json.dumps(data, indent=2))
     track_data = data["track"]
@@ -39,7 +51,7 @@ async def __extract_data(data: dict[str, Any]) -> dict[str, Any]:
     if album_id:
         album_attrs = seek_track(
             x=track_data["title"],
-            metadata=await shazam.album(album_id=int(album_id))
+            metadata=await __SHAZAM_CLIENT.album(album_id=int(album_id))
         )
 
         return {
@@ -66,7 +78,7 @@ async def __extract_data(data: dict[str, Any]) -> dict[str, Any]:
 
 
 async def search_song(song_file: str) -> TrackInfo:
-    raw_data: dict[str, Any] = await shazam.recognize(song_file)
+    raw_data: dict[str, Any] = await __SHAZAM_CLIENT.recognize(song_file)
     if "track" not in raw_data:
         raise SongRecognizeError(f"Not found {song_file}")
 
