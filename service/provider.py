@@ -34,11 +34,13 @@ async def __extract_data(data: dict[str, Any]) -> dict[str, Any]:
 
     def sanitize(s: str) -> str:
         rules = (
-            lambda x: re.sub(f'{os.path.sep}', repl='-', string=x),
-            lambda x: re.sub(f':', repl='_', string=x),
-            lambda x: re.sub(f'\\?', repl='', string=x),
-            lambda x: re.sub(f'"', repl='', string=x),
-            lambda x: re.sub(f"'", repl='', string=x),
+            lambda x: re.sub(f"{os.path.sep}", repl="-", string=x),
+            lambda x: re.sub(":", repl="_", string=x),
+            lambda x: re.sub("\\?", repl="", string=x),
+            lambda x: re.sub('"', repl="", string=x),
+            lambda x: re.sub("'", repl="", string=x),
+            lambda x: re.sub("\\*", repl="0", string=x),
+            lambda x: re.sub("!", repl="", string=x),
         )
         for rule in rules:
             s = rule(s)
@@ -46,34 +48,34 @@ async def __extract_data(data: dict[str, Any]) -> dict[str, Any]:
 
     logger.debug(json.dumps(data, indent=2))
     track_data = data["track"]
-    track_attrs = list(itertools.chain(*[x["metadata"] for x in track_data["sections"] if "metadata" in x]))
-    album_id = track_data.get('albumadamid')
+    track_attrs = list(
+        itertools.chain(
+            *[x["metadata"] for x in track_data["sections"] if "metadata" in x]
+        )
+    )
+    album_id = track_data.get("albumadamid")
     if album_id:
         album_attrs = seek_track(
             x=track_data["title"],
-            metadata=await __SHAZAM_CLIENT.album(album_id=int(album_id))
+            metadata=await __SHAZAM_CLIENT.album(album_id=int(album_id)),
         )
 
         return {
             "title": sanitize(track_data["title"]),
             "artist": sanitize(track_data["subtitle"]),
-            "track_number": album_attrs["trackNumber"],
+            "track_number": album_attrs["trackNumber"] if "trackNumber" in album_attrs else 0,
             "album": {
                 "id": int(album_id),
                 "name": sanitize(album_field("Album", track_attrs)),
-                "released": album_field("Released", track_attrs)
-            }
+                "released": album_field("Released", track_attrs),
+            },
         }
     else:
         return {
             "title": sanitize(track_data["title"]),
             "artist": sanitize(track_data["subtitle"]),
             "track_number": 0,
-            "album": {
-                "id": 0,
-                "name": "Unknown",
-                "released": 0
-            }
+            "album": {"id": 0, "name": "Unknown", "released": 0},
         }
 
 
@@ -91,6 +93,6 @@ async def search_song(song_file: str) -> TrackInfo:
         album=Album(
             album_id=album_data["id"],
             name=album_data["name"],
-            released=album_data["released"]
-        )
+            released=album_data["released"],
+        ),
     )
